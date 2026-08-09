@@ -96,22 +96,36 @@ if user_input:
                 st.session_state.messages.append({"role": "assistant", "content": err})
                 st.stop()
 
-        template = TEMPLATE_PATH.read_text(encoding="utf-8") if TEMPLATE_PATH.exists() else ""
+        merged_prompt = f"""You are a QA engineer. Generate plain text test cases for the Jira ticket below.
 
-        merged_prompt = f"""{template}
+JIRA TICKET: {ticket['key']}
+Summary: {ticket['summary']}
+Type: {ticket['issue_type']} | Priority: {ticket['priority']}
 
----
-## Jira Ticket: {ticket['key']}
-**Summary:** {ticket['summary']}
-**Type:** {ticket['issue_type']} | **Priority:** {ticket['priority']}
-
-**Description:**
+Description:
 {ticket['description'] or '(none provided)'}
 
-**Acceptance Criteria:**
+Acceptance Criteria:
 {ticket['acceptance_criteria'] or '(none provided)'}
 
-Generate test cases in the TC-001 format defined above.
+---
+OUTPUT RULES:
+- Write each test case in plain text, no markdown, no code blocks, no bullet symbols.
+- Number each test case: Test Case 1, Test Case 2, etc.
+- Each test case must have exactly these sections:
+
+Test Case [N]: [Short title]
+Summary: [One sentence describing what is being tested]
+Preconditions: [What must be true before the test starts]
+Steps:
+  1. [Action]
+  2. [Action]
+  3. [Action]
+Expected Result: [What should happen]
+Pass Criteria: [Specific measurable condition that confirms success]
+
+- Cover: Happy Path, Negative scenarios, Edge cases, and Input validation.
+- Do not explain yourself. Output only the test cases.
 """
 
         active_provider = "🦙 Ollama" if provider == "ollama" else "🤖 Groq"
