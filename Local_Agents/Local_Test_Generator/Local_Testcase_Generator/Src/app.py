@@ -87,136 +87,49 @@ if "messages" not in st.session_state:
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _esc(text: str) -> str:
-    import html as _html
-    return _html.escape(str(text))
-
-
-def _extract_section(body: str, *names: str) -> str:
-    for name in names:
-        m = re.search(
-            rf"(?:^|\n){re.escape(name)}:\s*(.*?)(?=\n[A-Za-z][^\n]*:|\Z)",
-            body, re.DOTALL | re.IGNORECASE,
-        )
-        if m:
-            return m.group(1).strip()
-    return ""
-
-
-def _extract_steps(body: str) -> list[dict]:
-    m = re.search(
-        r"(?:Steps(?:\s+and\s+Test\s+Data)?|Steps):\s*\n(.*?)(?=\n[A-Za-z][^\n]*:|\Z)",
-        body, re.DOTALL | re.IGNORECASE,
-    )
-    if not m:
-        return []
-    step_lines = re.findall(r"^\s*\d+\.\s*(.+)$", m.group(1), re.MULTILINE)
-    steps = []
-    for line in step_lines:
-        line = line.strip()
-        if re.search(r"\|\s*Test\s*Data\s*:", line, re.IGNORECASE):
-            parts = re.split(r"\|\s*Test\s*Data\s*:\s*", line, 1, flags=re.IGNORECASE)
-            action = re.sub(r"^Step\s*:\s*", "", parts[0].strip(), flags=re.IGNORECASE)
-            data = parts[1].strip() if len(parts) > 1 else ""
-        else:
-            action = line
-            data = ""
-        steps.append({"action": action, "data": data})
-    return steps
-
-
-def _parse_test_cases(response: str) -> list[dict]:
-    parts = re.split(r"(?=Test Case \d+:)", response.strip())
-    parts = [p.strip() for p in parts if p.strip()]
-    if not parts or not re.match(r"Test Case \d+:", parts[0]):
-        return []
-    result = []
-    for i, block in enumerate(parts):
-        lines = block.split("\n")
-        m = re.match(r"Test Case (\d+):\s*(.*)", lines[0])
-        body = "\n".join(lines[1:])
-        result.append({
-            "id": m.group(1) if m else str(i + 1),
-            "title": m.group(2).strip() if m else f"Test Case {i + 1}",
-            "description": _extract_section(body, "Description", "Summary"),
-            "preconditions": _extract_section(body, "Preconditions", "Precondition"),
-            "steps": _extract_steps(body),
-            "expected_outcome": _extract_section(body, "Expected Outcome", "Expected Result", "Pass Criteria"),
-        })
-    return result
-
-
-def _build_table_html(test_cases: list[dict]) -> str:
-    rows = ""
-    for tc in test_cases:
-        steps_html = ""
-        for j, step in enumerate(tc["steps"], 1):
-            data_html = ""
-            if step["data"] and step["data"].strip().lower() not in ("n/a", "none", "-", ""):
-                data_html = (
-                    f'<div class="step-data">'
-                    f'<span class="step-data-lbl">Data:</span> {_esc(step["data"])}'
-                    f'</div>'
-                )
-            steps_html += (
-                f'<div class="step-item">'
-                f'<span class="step-badge">{j}</span>'
-                f'<div class="step-body">'
-                f'<div class="step-action">{_esc(step["action"])}</div>'
-                f'{data_html}'
-                f'</div></div>'
-            )
-
-        pre_html = ""
-        if tc["preconditions"]:
-            pre_html = (
-                f'<div class="tc-pre">'
-                f'<span class="tc-pre-lbl">Pre:</span> {_esc(tc["preconditions"])}'
-                f'</div>'
-            )
-
-        rows += (
-            f'<tr class="tc-row">'
-            f'<td class="td-id"><div class="tc-num">TC-{_esc(tc["id"])}</div></td>'
-            f'<td class="td-desc">'
-            f'<div class="tc-ttl">{_esc(tc["title"])}</div>'
-            f'<div class="tc-sum">{_esc(tc["description"])}</div>'
-            f'{pre_html}</td>'
-            f'<td class="td-steps">{steps_html or "<span class=\"no-steps\">—</span>"}</td>'
-            f'<td class="td-outcome">{_esc(tc["expected_outcome"])}</td>'
-            f'</tr>'
-        )
-
-    return (
-        '<div class="tc-table-wrap">'
-        '<table class="tc-table">'
-        '<thead><tr>'
-        '<th class="th-id">TC ID</th>'
-        '<th class="th-desc">Description</th>'
-        '<th class="th-steps">Steps &amp; Test Data</th>'
-        '<th class="th-outcome">Expected Outcome</th>'
-        '</tr></thead>'
-        f'<tbody>{rows}</tbody>'
-        '</table></div>'
+def _format_tc_body(body: str) -> str:
+    """Bold the field-label lines in a test case body."""
+    return re.sub(
+        r"^(Summary|Preconditions?|Steps|Expected Result|Pass Criteria|Type|Priority|Related):",
+        r"**\1:**",
+        body,
+        flags=re.MULTILINE,
     )
 
 
 def _render_test_cases(response: str, ticket_key: str, btn_key: str = "dl") -> None:
-    test_cases = _parse_test_cases(response)
+    """Parse LLM response and render each test case as an expandable card."""
+    parts = re.split(r"(?=Test Case \d+:)", response.strip())
+    parts = [p.strip() for p in parts if p.strip()]
 
-    if not test_cases:
+    # Fallback: no parseable test cases → plain markdown
+    if not parts or not re.match(r"Test Case \d+:", parts[0]):
         st.markdown(response)
         return
 
-    count = len(test_cases)
+    count = len(parts)
     st.markdown(
-        f'<div class="tc-section">'
-        f'<span class="tc-section-title">📋 Generated Test Cases</span>'
-        f'<span class="tc-badge">{count} test case{"s" if count != 1 else ""}&nbsp;·&nbsp;{ticket_key}</span>'
-        f'</div>',
+        f"""
+        <div class="tc-section">
+          <span class="tc-section-title">📋 Generated Test Cases</span>
+          <span class="tc-badge">{count} test case{"s" if count != 1 else ""}&nbsp;·&nbsp;{ticket_key}</span>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-    st.markdown(_build_table_html(test_cases), unsafe_allow_html=True)
+
+    for i, tc_text in enumerate(parts):
+
+        first_line = tc_text.split("\n")[0]
+        m = re.match(r"Test Case \d+:\s*(.*)", first_line)
+        title = m.group(1).strip() if m else f"Test Case {i + 1}"
+
+        body = "\n".join(tc_text.split("\n")[1:]).strip()
+        body = _format_tc_body(body)
+
+        with st.expander(f"Test Case {i + 1}: {title}", expanded=(i == 0)):
+            st.markdown(body)
+
     st.download_button(
         label="📥 Download as Markdown",
         data=response,
@@ -227,6 +140,7 @@ def _render_test_cases(response: str, ticket_key: str, btn_key: str = "dl") -> N
 
 
 def _render_message(msg: dict, idx: int) -> None:
+    """Re-render a saved chat message."""
     with st.chat_message(msg["role"]):
         if msg["role"] == "user":
             st.markdown(msg["content"])
@@ -239,7 +153,7 @@ def _render_message(msg: dict, idx: int) -> None:
 
 
 def _build_prompt(ticket: dict) -> str:
-    return f"""You are a QA engineer. Generate structured test cases for the Jira ticket below.
+    return f"""You are a QA engineer. Generate plain text test cases for the Jira ticket below.
 
 JIRA TICKET: {ticket['key']}
 Summary: {ticket['summary']}
@@ -255,18 +169,18 @@ Acceptance Criteria:
 OUTPUT RULES:
 - Write each test case in plain text, no markdown, no code blocks, no bullet symbols.
 - Number each test case: Test Case 1, Test Case 2, etc.
-- Use EXACTLY these section labels for every test case:
+- Each test case must have exactly these sections:
 
 Test Case [N]: [Short title]
-Description: [One sentence describing what is being tested]
+Summary: [One sentence describing what is being tested]
 Preconditions: [What must be true before the test starts]
-Steps and Test Data:
-  1. Step: [Action the tester performs] | Test Data: [specific input value or N/A]
-  2. Step: [Action] | Test Data: [specific value or N/A]
-  3. Step: [Action] | Test Data: [specific value or N/A]
-Expected Outcome: [Specific measurable result that confirms the test passed]
+Steps:
+  1. [Action]
+  2. [Action]
+  3. [Action]
+Expected Result: [What should happen]
+Pass Criteria: [Specific measurable condition that confirms success]
 
-- Provide concrete Test Data values (e.g. email="admin@test.com", amount=0, query="<script>alert(1)</script>").
 - Cover: Happy Path, Negative scenarios, Edge cases, and Input validation.
 - Do not explain yourself. Output only the test cases.
 """
