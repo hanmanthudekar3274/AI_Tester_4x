@@ -1,0 +1,28 @@
+# Secrets - never commit
+.env
+*.env
+!.env.example
+
+# Intermediates and cache
+.tmp/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Generated output
+output/
+*.docx
+!templates/*.docx
+
+# OS / editor
+.DS_Store
+Thumbs.db
+~$*
+.vscode/
+.idea/
