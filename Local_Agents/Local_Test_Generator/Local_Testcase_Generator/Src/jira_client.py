@@ -59,15 +59,23 @@ def fetch_ticket(ticket_key: str, config: dict) -> dict:
     else:
         description = ""
 
-    # Try common custom field names for acceptance criteria
+    # Check customfield_10016 first, then fall back to any field with "acceptance" in the name
     acceptance_criteria = ""
-    for key, val in fields.items():
-        if "acceptance" in key.lower() and isinstance(val, (str, dict)):
-            if isinstance(val, dict):
-                acceptance_criteria = _extract_adf_text(val).strip()
-            else:
-                acceptance_criteria = val.strip()
-            break
+    cf = fields.get("customfield_10016")
+    if cf:
+        if isinstance(cf, dict):
+            acceptance_criteria = _extract_adf_text(cf).strip()
+        elif isinstance(cf, str):
+            acceptance_criteria = cf.strip()
+
+    if not acceptance_criteria:
+        for key, val in fields.items():
+            if "acceptance" in key.lower() and isinstance(val, (str, dict)):
+                if isinstance(val, dict):
+                    acceptance_criteria = _extract_adf_text(val).strip()
+                else:
+                    acceptance_criteria = val.strip()
+                break
 
     return {
         "key": ticket_key,
