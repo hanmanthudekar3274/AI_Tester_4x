@@ -1,0 +1,101 @@
+Test Case ID,Module,Scenario,Test Case,Priority
+TC001,Login,Valid login,Verify user can log in with valid credentials,High
+TC002,Login,Invalid password,Verify login fails with an invalid password,High
+TC003,Login,Invalid email,Verify login fails with an invalid email,High
+TC004,Login,Blank credentials,Verify validation appears when credentials are blank,High
+TC005,Login,Password masking,Verify password is masked during entry,Medium
+TC006,Login,Forgot password,Verify user can initiate password recovery,High
+TC007,Login,Account lockout,Verify repeated failed attempts trigger the defined protection,High
+TC008,Login,Session persistence,Verify authenticated session persists as expected,Medium
+TC009,Login,Logout,Verify user can log out successfully,High
+TC010,Login,Back after logout,Verify protected pages are not accessible after logout,High
+TC011,Registration,Create account,Verify a new account can be created with valid data,High
+TC012,Registration,Duplicate email,Verify registration rejects an already registered email,High
+TC013,Registration,Invalid email,Verify invalid email format is rejected,Medium
+TC014,Registration,Weak password,Verify password policy is enforced,High
+TC015,Registration,Required fields,Verify required registration fields are validated,Medium
+TC016,Search,Product search,Verify search returns relevant products for a valid keyword,High
+TC017,Search,No results,Verify an appropriate result is shown for a nonexistent product,Medium
+TC018,Search,Empty search,Verify empty search is handled correctly,Medium
+TC019,Search,Special characters,Verify search handles special characters safely,High
+TC020,Search,Long query,Verify search handles a very long query safely,Medium
+TC021,Search,Case handling,Verify search behavior is consistent for different letter cases,Low
+TC022,Search,Autocomplete,Verify relevant autocomplete suggestions appear,Medium
+TC023,Search,Suggestion selection,Verify selecting an autocomplete suggestion opens the correct results,Medium
+TC024,Search,Search history,Verify search history behavior matches the expected design,Low
+TC025,Search,Filter results,Verify filters narrow results correctly,High
+TC026,Search,Sort results,Verify sorting changes product order correctly,Medium
+TC027,Product,Product details,Verify product details page displays correct information,High
+TC028,Product,Product images,Verify product images load and can be viewed,Medium
+TC029,Product,Image zoom,Verify product image zoom works when available,Low
+TC030,Product,Price display,Verify displayed product price is consistent with the selected item,High
+TC031,Product,Availability,Verify product availability status is displayed correctly,High
+TC032,Product,Product variants,Verify selecting a variant updates relevant information,High
+TC033,Product,Seller information,Verify seller information is displayed correctly,Medium
+TC034,Product,Ratings,Verify product ratings and review summary are displayed,Medium
+TC035,Product,Reviews,Verify product reviews can be viewed,Medium
+TC036,Cart,Add to cart,Verify an available product can be added to the cart,High
+TC037,Cart,Remove item,Verify a cart item can be removed,High
+TC038,Cart,Update quantity,Verify cart quantity can be changed,High
+TC039,Cart,Quantity boundary,Verify quantity boundaries are enforced,High
+TC040,Cart,Cart total,Verify cart totals update after quantity changes,High
+TC041,Cart,Multiple products,Verify multiple different products can coexist in the cart,High
+TC042,Cart,Out-of-stock item,Verify unavailable products cannot be purchased,High
+TC043,Cart,Persistent cart,Verify cart behavior after signing out and signing back in,Medium
+TC044,Cart,Empty cart,Verify empty-cart state is displayed correctly,Medium
+TC045,Cart,Price update,Verify cart handles a product price change appropriately,High
+TC046,Wishlist,Add wishlist,Verify a product can be added to the wishlist when available,Medium
+TC047,Wishlist,Remove wishlist,Verify a wishlist item can be removed,Medium
+TC048,Wishlist,Wishlist persistence,Verify wishlist items persist for the signed-in user,Medium
+TC049,Checkout,Start checkout,Verify checkout can be started with eligible cart items,High
+TC050,Checkout,Address selection,Verify a saved delivery address can be selected,High
+TC051,Checkout,Add address,Verify a new delivery address can be added,High
+TC052,Checkout,Invalid address,Verify invalid or incomplete address data is rejected,High
+TC053,Checkout,Address edit,Verify a saved address can be edited,Medium
+TC054,Checkout,Delivery option,Verify an available delivery option can be selected,High
+TC055,Checkout,Delivery charge,Verify delivery charges are reflected in the order total,High
+TC056,Checkout,Order summary,Verify checkout order summary matches cart contents,High
+TC057,Checkout,Coupon,Verify a valid eligible promotion is applied correctly,Medium
+TC058,Checkout,Invalid coupon,Verify an invalid or ineligible promotion is rejected,Medium
+TC059,Checkout,Expired coupon,Verify an expired promotion cannot be applied,Medium
+TC060,Checkout,Final total,Verify final payable amount is calculated correctly,High
+TC061,Payment,Card payment,Verify a valid card payment can be completed,Critical
+TC062,Payment,Invalid card,Verify invalid card details are rejected,Critical
+TC063,Payment,Expired card,Verify expired card details are rejected,High
+TC064,Payment,Insufficient funds,Verify payment failure is handled appropriately,Critical
+TC065,Payment,Payment cancellation,Verify user can recover after cancelling payment,High
+TC066,Payment,Payment retry,Verify failed payment can be retried safely,High
+TC067,Payment,Duplicate submission,Verify repeated payment submission does not create duplicate orders,Critical
+TC068,Payment,Payment timeout,Verify payment timeout is handled without corrupting order state,Critical
+TC069,Payment,Order after success,Verify successful payment creates the expected order,Critical
+TC070,Payment,Payment confirmation,Verify payment confirmation is displayed or communicated appropriately,High
+TC071,Orders,Order history,Verify signed-in user can view order history,High
+TC072,Orders,Order details,Verify an order detail page shows the correct order information,High
+TC073,Orders,Order status,Verify order status progresses correctly,High
+TC074,Orders,Cancel order,Verify an eligible order can be cancelled,High
+TC075,Orders,Cancellation restriction,Verify cancellation is prevented when the order is no longer eligible,Medium
+TC076,Orders,Return request,Verify an eligible item can have a return request initiated,High
+TC077,Orders,Refund status,Verify refund status is displayed correctly when applicable,High
+TC078,Orders,Invoice,Verify order invoice/details can be accessed when available,Medium
+TC079,Orders,Guest order tracking,Verify guest order tracking works when supported,Medium
+TC080,Orders,Order notifications,Verify order status notifications are triggered as expected,Medium
+TC081,Account,Profile update,Verify user can update supported profile information,Medium
+TC082,Account,Address management,"Verify saved addresses can be added, edited, and removed",High
+TC083,Account,Password change,Verify authenticated user can change password successfully,High
+TC084,Account,Password validation,Verify password-change policy is enforced,High
+TC085,Account,Session security,Verify sensitive account actions require appropriate authentication,Critical
+TC086,Security,Unauthorized access,Verify protected account data cannot be accessed without authorization,Critical
+TC087,Security,Input injection,Verify user inputs are handled safely against injection attempts,Critical
+TC088,Security,XSS payload,Verify user-controlled input is safely handled against script injection,Critical
+TC089,Security,HTTPS,Verify sensitive pages and actions use secure transport,High
+TC090,Security,Sensitive data,Verify sensitive payment/account information is not unnecessarily exposed,Critical
+TC091,Performance,Search response,Verify search responds within the defined performance target,Medium
+TC092,Performance,Product page load,Verify product pages meet the defined load-time target,Medium
+TC093,Performance,Cart update,Verify cart updates remain responsive under normal load,Medium
+TC094,Performance,Checkout response,Verify checkout actions remain responsive under expected load,High
+TC095,Compatibility,Desktop browser,Verify core shopping flow works on a supported desktop browser,Medium
+TC096,Compatibility,Mobile browser,Verify core shopping flow works on a supported mobile browser,High
+TC097,Accessibility,Keyboard navigation,Verify key shopping flows are usable with keyboard navigation,Medium
+TC098,Accessibility,Screen reader labels,Verify important controls have meaningful accessible labels,Medium
+TC099,Recovery,Network interruption,Verify temporary network interruption does not corrupt cart or order state,High
+TC100,Recovery,Refresh during checkout,Verify refreshing during checkout preserves or safely restores the expected state,High
